@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест профорієнтації в IT для 7 класу</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .question-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .question-title {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            color: #202124;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background: #fff;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option-label:hover {
+            background: #f1f3f4;
+            border-color: #1a73e8;
+        }
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+        .btn-submit {
+            display: block;
+            width: 100%;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover {
+            background: #1557b0;
+        }
+        #result-box {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 8px;
+            background: #e8f0fe;
+            border: 1px solid #1a73e8;
+        }
+        .result-title {
+            color: #1a73e8;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .profile-desc {
+            font-size: 1.1em;
+            margin-top: 15px;
+        }
+        .charts {
+            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #dadce0;
+        }
+        .chart-bar-wrapper {
+            margin-bottom: 10px;
+        }
+        .chart-label {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+        .chart-bar-container {
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            height: 20px;
+        }
+        .chart-bar {
+            height: 100%;
+            background: #1a73e8;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Тест профорієнтації: Твій шлях в IT</h1>
+    <p class="description">Дай відповіді на 20 запитань, щоб дізнатися, який напрямок комп'ютерних наук тобі підходить найбільше (за програмою 7 класу)!</p>
+    
+    <form id="quiz-form">
+        <!-- Questions will be inserted here via JS for cleaner code structure -->
+        <div id="questions-container"></div>
+        
+        <button type="button" class="btn-submit" onclick="calculateResult()">Дізнатися результат</button>
+    </form>
+
+    <div id="result-box">
+        <div class="result-title">Твій головний напрямок: <span id="top-profile"></span></div>
+        <p class="profile-desc" id="profile-details"></p>
+        
+        <div class="charts">
+            <h3>Розподіл твоїх інтересів:</h3>
+            <div id="chart-results"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        q: "Яке завдання на уроці інформатики приносить тобі найбільше задоволення?",
+        options: [
+            { text: "Складати алгоритми, щоб персонаж у Scratch рухався та виконував команди", cat: "prog" },
+            { text: "Малювати банери, підбирати кольори для презентацій чи обробляти картинки", cat: "design" },
+            { text: "Рахувати щось за формулами в Excel, будувати графіки та діаграми", cat: "data" },
+            { text: "Налаштовувати операційну систему, розбиратися з файлами та папками", cat: "tech" }
+        ]
+    },
+    {
+        q: "Уявіть, що ваша команда створює власну комп'ютерну гру. Чим займешся саме ти?",
+        options: [
+            { text: "Писатиму правила гри, логіку поведінки ворогів та підрахунок балів", cat: "prog" },
+            { text: "Малюватиму персонажів, рівні, підбиратиму красиві шрифти", cat: "design" },
+            { text: "Аналізуватиму, скільки гравців пройшли рівень і яка зброя найпопулярніша", cat: "data" },
+            { text: "Слідкуватиму, щоб гра не зависала і швидко завантажувалась на серверах", cat: "tech" }
+        ]
+    },
+    {
+        q: "Яка суперздатність у світі технологій здається тобі найкрутішою?",
+        options: [
+            { text: "Вміння змусити будь-який пристрій виконувати твої текстові команди", cat: "prog" },
+            { text: "Здатність створювати неймовірні 3D світи та красиві інтерфейси", cat: "design" },
+            { text: "Вміння передбачати майбутнє (наприклад, погоду чи тренди) за допомогою чисел", cat: "data" },
+            { text: "Здатність захистити будь-яку систему від найнебезпечніших хакерів", cat: "tech" }
+        ]
+    },
+    {
+        q: "Що ти робиш найперше, коли на комп'ютері чи телефоні зникає інтернет?",
+        options: [
+            { text: "Намагаюся зрозуміти логіку помилки або запускаю офлайн-гру зі своїм кодом", cat: "prog" },
+            { text: "Звертаю увагу на те, як змінився дизайн сторінки помилки «Динозаврик»", cat: "design" },
+            { text: "Перевіряю статистику використання трафіку в налаштуваннях", cat: "data" },
+            { text: "Перезавантажую роутер, перевіряю дроти та IP-адресу", cat: "tech" }
+        ]
+    },
+    {
+        q: "Тобі доручили зробити проєкт про історію школи. Твій підхід:",
+        options: [
+            { text: "Зроблю інтерактивну вікторину або міні-сайт з переходами по кнопках", cat: "prog" },
+            { text: "Підберу круті фотографії, змонтую гарне відео з ефектами", cat: "design" },
+            { text: "Зберу статистику випускників по роках і оформлю у вигляді гарної таблиці", cat: "data" },
+            { text: "Налаштую спільний доступ у хмарі (Google Диск), щоб усі могли редагувати разом", cat: "tech" }
+        ]
+    },
+    {
+        q: "Який предмет, окрім інформатики, тобі дається або подобається найбільше?",
+        options: [
+            { text: "Математика (алгебра) або логіка", cat: "prog" },
+            { text: "Образотворче мистецтво, література або технології (трудове)", cat: "design" },
+            { text: "Географія (робота з картами, статистикою країн) або історія", cat: "data" },
+            { text: "Фізика (як влаштовані прилади, електрика)", cat: "tech" }
+        ]
+    },
+    {
+        q: "Коли ти бачиш складну заплутану задачу, ти зазвичай:",
+        options: [
+            { text: "Розбиваєш її на маленькі прості кроки (команди) і вирішуєш по черзі", cat: "prog" },
+            { text: "Намагаєшся уявити її візуально у вигляді схеми або малюнка", cat: "design" },
+            { text: "Шукаєш закономірності чи схожі випадки, які були раніше", cat: "data" },
+            { text: "Перевіряєш, чи всі інструменти під рукою працюють правильно", cat: "tech" }
+        ]
+    },
+    {
+        q: "У які додатки на телефоні/ПК ти заглядаєш з найбільшим інтересом до їх роботи?",
+        options: [
+            { text: "Ігри та додатки, де можна щось будувати чи модифікувати", cat: "prog" },
+            { text: "YouTube, TikTok, Canva, фоторедактори (як змонтовано контент)", cat: "design" },
+            { text: "Фітнес-трекери, погода, де є графіки активності та кроків", cat: "data" },
+            { text: "Налаштування телефону, VPN, антивіруси", cat: "tech" }
+        ]
+    },
+    {
+        q: "Що тебе найбільше дратує в програмах чи сайтах?",
+        options: [
+            { text: "Коли натискаєш кнопку, а вона не працює або видає помилку в коді", cat: "prog" },
+            { text: "Незручне меню, жахливі кольори та некрасиві шрифти", cat: "design" },
+            { text: "Коли інформацію важко знайти і немає зручного пошуку чи фільтрів", cat: "data" },
+            { text: "Коли додаток постійно вилітає, довго вантажиться або вимагає купу дозволів", cat: "tech" }
+        ]
+    },
+    {
+        q: "Уяви, що ти працюєш у хмарних сховищах (наприклад, Google Drive). Тобі цікавіше:",
+        options: [
+            { text: "Написати скрипт, який автоматично сортує завантажені файли", cat: "prog" },
+            { text: "Створити красиві іконки для папок та налаштувати інтерфейс", cat: "design" },
+            { text: "Проаналізувати, які типи файлів займають найбільше місця на диску", cat: "data" },
+            { text: "Налаштувати складні права доступу та захистити файли від зламу", cat: "tech" }
+        ]
+    },
+    {
+        q: "Який тип конструктора тобі ближчий?",
+        options: [
+            { text: "Lego Mindstorms, де блоки можна програмувати на рух", cat: "prog" },
+            { text: "Звичайне Lego, де головне — побудувати красиву деталізовану будівлю", cat: "design" },
+            { text: "Набори, де треба сортувати деталі за розміром та кольором для великого проекту", cat: "data" },
+            { text: "Конструктор електроніки, де треба з'єднувати дроти та плати", cat: "tech" }
+        ]
+    },
+    {
+        q: "Якби ти створював власного робота-помічника, що було б його головною фішкою?",
+        options: [
+            { text: "Він вміє виконувати складні логічні команди та приймати рішення", cat: "prog" },
+            { text: "Він виглядає неймовірно футуристично, має екран з мімікою", cat: "design" },
+            { text: "Він запам'ятовує все, що ти робиш, і веде щоденник твоєї продуктивності", cat: "data" },
+            { text: "Він має купу датчиків, захищений від води та ударів, сам заряджається", cat: "tech" }
+        ]
+    },
+    {
+        q: "Коли ти працюєш з текстом або рефератом на комп'ютері, що тобі подобається?",
+        options: [
+            { text: "Налаштовувати гіперпосилання, автоматичний зміст та списки", cat: "prog" },
+            { text: "Підбирати стиль заголовків, додавати ілюстрації та рамки", cat: "design" },
+            { text: "Шукати точні факти, цифри та цитати для наповнення", cat: "data" },
+            { text: "Перевіряти формат файлу (.docx, .pdf) та відправляти його в хмару", cat: "tech" }
+        ]
+    },
+    {
+        q: "Що для тебе означає поняття 'Безпека в Інтернеті'?",
+        options: [
+            { text: "Перевірка сайтів на наявність підозрілих скриптів та коду", cat: "prog" },
+            { text: "Вміння відрізнити фейкову (некрасиву) рекламу від справжнього сайту", cat: "design" },
+            { text: "Знання того, як захистити свої персональні дані від збору компаніями", cat: "data" },
+            { text: "Встановлення складних паролів, двофакторної автентифікації та антивірусів", cat: "tech" }
+        ]
+    },
+    {
+        q: "Ти знайшов помилку (баг) у своїй улюбленій грі. Твоя реакція:",
+        options: [
+            { text: "Спробую зрозуміти, за яких умов вона повторюється, щоб розгадати алгоритм", cat: "prog" },
+            { text: "Звертаю увагу, як через помилку спотворилася графіка або текстури", cat: "design" },
+            { text: "Подивлюся на форумах статистику, скільки ще гравців знайшли цю помилку", cat: "data" },
+            { text: "Спробую почистити кеш гри, оновити драйвери або перевстановити її", cat: "tech" }
+        ]
+    },
+    {
+        q: "Яка тема з уроків інформатики здалася тобі найпростішою та найзрозумілішою?",
+        options: [
+            { text: "Цикли, розгалуження та виконавці (алгоритми)", cat: "prog" },
+            { text: "Робота у графічному редакторі, створення колажів чи листівок", cat: "design" },
+            { text: "Створення та заповнення таблиць, сортування даних", cat: "data" },
+            { text: "Параметри комп'ютера, пам'ять, процесори", cat: "tech" }
+        ]
+    },
+    {
+        q: "Якби ти робив презентацію, на що витратив би найбільше часу?",
+        options: [
+            { text: "На налаштування складних переходів, анімацій та інтерактивних кнопок", cat: "prog" },
+            { text: "На пошук красивого шаблону, ідеальних кольорів та крутих картинок", cat: "design" },
+            { text: "На перевірку інформації, графіків та побудову точних діаграм", cat: "data" },
+            { text: "На те, щоб вона коректно відкривалася на будь-якому комп'ютері чи проекторі", cat: "tech" }
+        ]
+    },
+    {
+        q: "Який гаджет майбутнього ти хотів би протестувати першим?",
+        options: [
+            { text: "Пристрій, який перекладає твої думки у працюючий код", cat: "prog" },
+            { text: "Окуляри доповненої реальності з неймовірним візуальним інтерфейсом", cat: "design" },
+            { text: "Суперкомп'ютер, що за секунду вираховує шанси на перемогу у будь-чому", cat: "data" },
+            { text: "Кібер-браслет, який керує безпекою всього твого дому та техніки", cat: "tech" }
+        ]
+    },
+    {
+        q: "Що найкраще описує твій стиль роботи в групі?",
+        options: [
+            { text: "Я той, хто розробляє план дій і покроково вирішує завдання", cat: "prog" },
+            { text: "Я той, хто красиво оформлює фінальний результат проекту", cat: "design" },
+            { text: "Я той, хто шукає інформацію, перевіряє факти і рахує цифри", cat: "data" },
+            { text: "Я той, хто організовує зв'язок, налаштовує чат та стежить, щоб техніка працювала", cat: "tech" }
+        ]
+    },
+    {
+        q: "Уяви, що ти ведеш блог. Що для тебе найважливіше з технічної точки зору?",
+        options: [
+            { text: "Налаштувати автоматичну публікацію постів через ботів", cat: "prog" },
+            { text: "Зробити унікальну обкладинку, аватарку та красивий стиль сторінки", cat: "design" },
+            { text: "Аналізувати перегляди, лайки та графіки активності підписників", cat: "data" },
+            { text: "Захистити свій акаунт від злому хакерів та налаштувати безпечний пароль", cat: "tech" }
+        ]
+    }
+];
+
+const categories = {
+    prog: {
+        title: "Створення ігор та програм (Алгоритміст / Програміст)",
+        desc: "Тобі подобається логіка, правила та алгоритми! Тобі чудово підійде розробка ігор, мобільних додатків або вебсайтів. Твій наступний крок у 7-9 класі — перехід від блоків Scratch до текстового програмування (наприклад, мови Python)."
+    },
+    design: {
+        title: "Цифрова творчість та дизайн (Мультимедіа / UX/UI)",
+        desc: "У тебе чудовий смак та творче бачення! Зверни увагу на комп'ютерну графіку, 3D-моделювання, вебдизайн або відеомонтаж. Ти вмієш робити технології не просто корисними, а й красивими та зручними для людей."
+    },
+    data: {
+        title: "Робота з даними та інформацією (Аналітик / Data Scientist)",
+        desc: "Твій мозок обожнює порядок, цифри та аналіз. Тобі підійде робота з базами даних, аналітика в бізнесі або штучний інтелект. Світ великих даних (Big Data) тримається саме на людях, які вміють бачити логіку в таблицях Excel!"
+    },
+    tech: {
+        title: "Комп'ютерна інженерія та безпека (Кібербезпека / Сисадмін)",
+        desc: "Тобі цікаво, як влаштовані речі зсередини! Напрямки для тебе: кібербезпека (захист мереж), хмарні технології, системне адміністрування або робототехніка ('залізо'). Ти — той, на кому тримається стабільність усього Інтернету."
+    }
+};
+
+// Render Questions
+const container = document.getElementById('questions-container');
+questions.forEach((q, qIndex) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    
+    const title = document.createElement('div');
+    title.className = 'question-title';
+    title.innerText = `${qIndex + 1}. ${q.q}`;
+    card.appendChild(title);
+    
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
+    
+    q.options.forEach((opt, oIndex) => {
+        const label = document.createElement('label');
+        label.className = 'option-label';
+        
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = `q${qIndex}`;
+        radio.value = opt.cat;
+        if(oIndex === 0) radio.required = true; // basic validation
+        
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(opt.text));
+        optionsDiv.appendChild(label);
+    });
+    
+    card.appendChild(optionsDiv);
+    container.appendChild(card);
+});
+
+function calculateResult() {
+    const form = document.getElementById('quiz-form');
+    const formData = new FormData(form);
+    
+    let scores = { prog: 0, design: 0, data: 0, tech: 0 };
+    let answeredCount = 0;
+    
+    for (let i = 0; i < questions.length; i++) {
+        const answer = formData.get(`q${i}`);
+        if (answer) {
+            scores[answer]++;
+            answeredCount++;
+        }
+    }
+    
+    if (answeredCount < questions.length) {
+        alert(`Будь ласка, дайте відповіді на всі запитання! (Відповідей: ${answeredCount} з ${questions.length})`);
+        return;
+    }
+    
+    // Find top profile
+    let topCat = 'prog';
+    for (let cat in scores) {
+        if (scores[cat] > scores[topCat]) {
+            topCat = cat;
+        }
+    }
+    
+    // Show results box
+    document.getElementById('top-profile').innerText = categories[topCat].title;
+    document.getElementById('profile-details').innerText = categories[topCat].desc;
+    
+    // Render chart scores
+    const chartResults = document.getElementById('chart-results');
+    chartResults.innerHTML = '';
+    
+    for (let cat in scores) {
+        const percentage = Math.round((scores[cat] / questions.length) * 100);
+        
+        const barWrapper = document.createElement('div');
+        barWrapper.className = 'chart-bar-wrapper';
+        
+        const label = document.createElement('div');
+        label.className = 'chart-label';
+        label.innerText = `${categories[cat].title}: ${scores[cat]} відп. (${percentage}%)`;
+        
+        const barContainer = document.createElement('div');
+        barContainer.className = 'chart-bar-container';
+        
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar';
+        if (cat === topCat) bar.style.background = '#2ecc71'; // Green for top profile
+        
+        barWrapper.appendChild(label);
+        barContainer.appendChild(bar);
+        barWrapper.appendChild(barContainer);
+        chartResults.appendChild(barWrapper);
+        
+        // Trigger animation
+        setTimeout(() => {
+            bar.style.width = `${percentage}%`;
+        }, 100);
+    }
+    
+    const resultBox = document.getElementById('result-box');
+    resultBox.style.display = 'block';
+    resultBox.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
